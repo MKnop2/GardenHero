@@ -1,6 +1,7 @@
 package com.example.gardenherocompose
 
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -16,6 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
@@ -24,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import com.example.gardenherocompose.model.Plant
 import com.example.gardenherocompose.repository.PlantRepository
 import com.example.gardenherocompose.ui.theme.*
+import com.google.firebase.firestore.FirebaseFirestore
 
 class MainActivity : ComponentActivity() {
 
@@ -183,6 +186,9 @@ fun AddDialog(showDialog: Boolean, setShowDialog: (Boolean) -> Unit){
                                     name = addName,
                                     sensorName = addSensorName,
                                     valve = addValve.toInt())
+                            val document = FirebaseFirestore.getInstance().collection("test").document()//add(plant)
+                            document.set(plant)                                                             //HIER SOLLTE ES IN DAS DOKUMENT GESPEICHERT WERDEN!!!
+                            //handle.addOnSuccessListener { Log.d("Firebase", "Document saved") }
                             Toast.makeText(
                                 context,
                                 "added $addName to list",
@@ -216,6 +222,7 @@ fun AddDialog(showDialog: Boolean, setShowDialog: (Boolean) -> Unit){
                             addSpecies = newText
                         },
                             placeholder = {Text(text = "Species: ")},
+                            //label = { Text(stringResource(R.string.addSpecies))},
                             label = { Text(text = "Species: ")},
                             keyboardOptions = KeyboardOptions(
                                 keyboardType = KeyboardType.Text

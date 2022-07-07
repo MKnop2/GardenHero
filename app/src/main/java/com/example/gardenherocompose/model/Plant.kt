@@ -2,9 +2,10 @@ package com.example.gardenherocompose.model
 
 import android.graphics.Picture
 import androidx.compose.ui.graphics.painter.Painter
+import com.google.gson.annotations.SerializedName
 import java.util.*
 
-data class Plant(
+data class Plant(@SerializedName("name")
     val id: Int = 0,
     var picture: Int = 0,
     var name: String = "",

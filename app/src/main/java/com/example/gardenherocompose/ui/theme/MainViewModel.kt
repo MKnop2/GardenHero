@@ -18,6 +18,6 @@ class MainViewModel{
     }
 
     fun save(plant: Plant) {
-        firestore.collection("")
+        //firestore.collection("/MyGarden").add()
     }
 }
