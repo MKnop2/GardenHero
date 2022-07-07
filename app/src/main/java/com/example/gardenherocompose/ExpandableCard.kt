@@ -372,7 +372,7 @@ fun EditDialog(showDialog: Boolean, setShowDialog: (Boolean) -> Unit, plant: Pla
 fun ExpandableCardPreview(){
     ExpandableCard(
         plant = Plant(
-            id = 0,
+            id = "0",
             picture = R.drawable.ic_launcher_background,
             name = "Björn",
             species = "Cannabis",

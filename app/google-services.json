@@ -1,34 +1,33 @@
 {
   "project_info": {
-    "project_number": "667817168439",
-    "firebase_url": "https://greenlab-cf021-default-rtdb.europe-west1.firebasedatabase.app",
-    "project_id": "greenlab-cf021",
-    "storage_bucket": "greenlab-cf021.appspot.com"
+    "project_number": "124315713025",
+    "project_id": "mygreenlab-88557",
+    "storage_bucket": "mygreenlab-88557.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:667817168439:android:5b1bf176dd6f25d49079b2",
+        "mobilesdk_app_id": "1:124315713025:android:cedc0eb4d5bde0c0618a00",
         "android_client_info": {
           "package_name": "com.example.gardenherocompose"
         }
       },
       "oauth_client": [
         {
-          "client_id": "667817168439-jh8s8kaqc7p6dgs3te5er9uv0ulfj03u.apps.googleusercontent.com",
+          "client_id": "124315713025-3fvpomr175dsq0ma3c8avuug4qnnk225.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyBG0qC5vb_EVYyUSb7p7fs4TL_OiYZXT6A"
+          "current_key": "AIzaSyB6QcAFxCZJFU8_iqGT3U_s-N8T7U9Gku8"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "667817168439-jh8s8kaqc7p6dgs3te5er9uv0ulfj03u.apps.googleusercontent.com",
+              "client_id": "124315713025-3fvpomr175dsq0ma3c8avuug4qnnk225.apps.googleusercontent.com",
               "client_type": 3
             }
           ]

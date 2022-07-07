@@ -27,6 +27,7 @@ import com.example.gardenherocompose.model.Plant
 import com.example.gardenherocompose.repository.PlantRepository
 import com.example.gardenherocompose.ui.theme.*
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.FirebaseFirestoreSettings
 
 class MainActivity : ComponentActivity() {
 
@@ -186,9 +187,13 @@ fun AddDialog(showDialog: Boolean, setShowDialog: (Boolean) -> Unit){
                                     name = addName,
                                     sensorName = addSensorName,
                                     valve = addValve.toInt())
-                            val document = FirebaseFirestore.getInstance().collection("test").document()//add(plant)
-                            document.set(plant)                                                             //HIER SOLLTE ES IN DAS DOKUMENT GESPEICHERT WERDEN!!!
-                            //handle.addOnSuccessListener { Log.d("Firebase", "Document saved") }
+                            val firestore = FirebaseFirestore.getInstance()
+                            firestore.firestoreSettings = FirebaseFirestoreSettings.Builder().build()
+                            val document = firestore.collection("plants").document()
+                            plant.id = document.id
+                            val handle = document.set(plant)
+                            handle.addOnSuccessListener { Log.d("Firebase", "Document saved") }
+                            handle.addOnFailureListener { Log.d("Firebase", "Save failed $it") }
                             Toast.makeText(
                                 context,
                                 "added $addName to list",
@@ -272,7 +277,7 @@ fun AddDialog(showDialog: Boolean, setShowDialog: (Boolean) -> Unit){
 fun DeleteDialog(showDialog: Boolean, setShowDialog: (Boolean) -> Unit){
     val context = LocalContext.current
     if (showDialog) {
-        var addName by remember { mutableStateOf("") }
+        var deleteByName by remember { mutableStateOf("") }
         AlertDialog(
             onDismissRequest = {
             },
@@ -283,9 +288,31 @@ fun DeleteDialog(showDialog: Boolean, setShowDialog: (Boolean) -> Unit){
                 Row(modifier = Modifier.padding(all=10.dp), horizontalArrangement = Arrangement.Center) {
                     Button(modifier = Modifier,
                         onClick = {
+                            /*val firestore = FirebaseFirestore.getInstance()
+                            firestore.firestoreSettings = FirebaseFirestoreSettings.Builder().build()
+
+                            fun getPlantByName(deleteByName:String) {
+                                var plant = docu
+                                return plant
+                            }
+
+                            firestore.collection("plants").get()             //equals(deleteByName)
+
+                            firestore.collection("plants").where(firebase.firestore.FieldPath.documentId(), '==', 'fK3ddutEpD2qQqRMXNW5').get()
+
+                            var plant = firestore.document().get()
+
+                            var docRef = firestore.collection("plants")
+                            docRef.document(plant.id).delete()
+
+
+                            val document = firestore.collection("plants").document()
+                            val handle = document.delete()
+                            handle.addOnSuccessListener { Log.d("Firebase", "Document saved") }
+                            handle.addOnFailureListener { Log.d("Firebase", "Save failed $it") }*/
                             Toast.makeText(
                                 context,
-                                "deleted $addName from list",
+                                "deleted $deleteByName from list",
                                 Toast.LENGTH_LONG
                             ).show()
                             //items.value!!.remove(item)
@@ -315,8 +342,8 @@ fun DeleteDialog(showDialog: Boolean, setShowDialog: (Boolean) -> Unit){
             text = {
                 Column() {
                     Row() {
-                        OutlinedTextField(value = addName, onValueChange = { newText ->
-                            addName = newText
+                        OutlinedTextField(value = deleteByName, onValueChange = { newText ->
+                            deleteByName = newText
                         },
                             placeholder = {Text(text = "Name: ")},
                             label = { Text(text = "Name: ")},

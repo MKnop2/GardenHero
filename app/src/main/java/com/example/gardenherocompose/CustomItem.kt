@@ -56,7 +56,7 @@ fun CustomItem(plant: Plant) {
 fun CustomItemPreview() {
     CustomItem(
         plant = Plant(
-            id = 0,
+            id = "",
             picture = R.drawable.ic_launcher_background,
             name = "Björn",
             species = "Cannabis",

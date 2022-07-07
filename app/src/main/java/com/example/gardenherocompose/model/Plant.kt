@@ -6,7 +6,7 @@ import com.google.gson.annotations.SerializedName
 import java.util.*
 
 data class Plant(@SerializedName("name")
-    val id: Int = 0,
+    var id: String = "0",
     var picture: Int = 0,
     var name: String = "",
     var species: String = "",
