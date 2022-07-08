@@ -22,19 +22,10 @@ class PlantRepository {
                 val output = ArrayList<Plant>()
 
                 result.forEach {
-                    output.add(Plant(
-                        id = it.id,
-                        name = "Test",
-                        picture = R.drawable.pic_cannabis,
-                        species = "Cannabis",
-                        minWaterLevel = 60,
-                        maxWaterLevel = 85,
-                        currentWaterLevel = 62,
-                        lastPour = Date(),
-                        nextPour = Date(),
-                        sensorName = "Sensor1",
-                        valve = 1
-                    ))
+                    Log.d("FB",  it.toString())
+                    val tempPlant = it.toObject(Plant::class.java)
+                    tempPlant!!.picture = R.drawable.pic_cannabis
+                    output.add(tempPlant)
                 }
 
                 Log.d("Firestore", result.size.toString())

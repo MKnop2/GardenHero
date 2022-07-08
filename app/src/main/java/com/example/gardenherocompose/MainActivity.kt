@@ -1,5 +1,6 @@
 package com.example.gardenherocompose
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
@@ -33,6 +34,7 @@ class MainActivity : ComponentActivity() {
 
     //private val viewModel: MainViewModel by viewModel<MainViewModel>()
 
+    @SuppressLint("UnrememberedMutableState")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -45,6 +47,8 @@ class MainActivity : ComponentActivity() {
 
                     val plantRepository = PlantRepository()
                     val getAllData = plantRepository.getDataFromFirestore()
+                    val plantList = mutableStateListOf<Plant>()
+                    getAllData.observe(this) { plantList.addAll(it) }
                     Column() {
                         Text(modifier = Modifier.padding(12.dp,2.dp,12.dp,0.dp),text = "GardenHero Design 1.4", color = MaterialTheme.colors.primary, fontSize = MaterialTheme.typography.h5.fontSize, fontWeight = FontWeight.Bold)
                         LazyColumn(
@@ -54,14 +58,12 @@ class MainActivity : ComponentActivity() {
                             contentPadding = PaddingValues(all = 12.dp),
                             verticalArrangement = Arrangement.spacedBy(12.dp)
                         )  {
-                            getAllData.observeForever {
-                                Log.d("FirebaseSize", it.size.toString())
-                                Log.d("FirebasePlantName", it[0].name)
-                                items(items = it) { plant ->
-                                    //Log.d("FirebasePlantName", it[0].name)
+
+                                items(items = plantList) { plant ->
                                     ExpandableCard(plant = plant)
-                                }
+
                             }
+
                         }
                         Row(modifier = Modifier
                             .weight(2f)
@@ -296,25 +298,6 @@ fun DeleteDialog(showDialog: Boolean, setShowDialog: (Boolean) -> Unit){
                             val firestore = FirebaseFirestore.getInstance()
                             firestore.firestoreSettings = FirebaseFirestoreSettings.Builder().build()
 
-                            /*fun getPlantByName(deleteByName:String) {
-                                var plant = docu
-                                return plant
-                            }
-
-                            firestore.collection("plants").get()             //equals(deleteByName)
-
-                            firestore.collection("plants").where(firebase.firestore.FieldPath.documentId(), '==', 'fK3ddutEpD2qQqRMXNW5').get()
-
-                            var plant = firestore.document().get()
-
-                            var docRef = firestore.collection("plants")
-                            docRef.document(plant.id).delete()
-
-
-                            val document = firestore.collection("plants").document()
-                            val handle = document.delete()
-                            handle.addOnSuccessListener { Log.d("Firebase", "Document saved") }
-                            handle.addOnFailureListener { Log.d("Firebase", "Save failed $it") }*/
                             firestore.collection("plants").whereIn("name", listOf(deleteByName))
                                 .get()
                                 .addOnCompleteListener {

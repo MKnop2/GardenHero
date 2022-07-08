@@ -1,5 +1,6 @@
 package com.example.gardenherocompose
 
+import android.util.Log
 import android.widget.ImageButton
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.LinearOutSlowInEasing
@@ -40,6 +41,7 @@ import coil.compose.ImagePainter.State.Empty.painter
 import com.example.gardenherocompose.model.Plant
 import com.example.gardenherocompose.ui.theme.Shapes
 import com.example.gardenherocompose.ui.theme.light_grey
+import com.google.firebase.firestore.FirebaseFirestore
 import java.util.*
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -294,10 +296,33 @@ fun EditDialog(showDialog: Boolean, setShowDialog: (Boolean) -> Unit, plant: Pla
                 Row(modifier = Modifier.padding(all=10.dp), horizontalArrangement = Arrangement.Center) {
                     Button(modifier = Modifier,
                         onClick = {
+                            val oldName = plant.name
                             plant.species = species
                             plant.name = name
                             plant.sensorName = sensor
                             plant.valve = valve.toInt()
+
+                            val firestore = FirebaseFirestore.getInstance()
+
+                            firestore.collection("plants").whereIn("name", listOf(oldName))
+                                .get()
+                                .addOnCompleteListener {
+                                    if(it.isSuccessful) {
+                                        val snapshots = it.result
+                                        Log.d("Ausgabe", plant.name)
+                                        snapshots.forEach {
+                                                document ->
+                                            Log.d("Ausgabe", "TRUE")
+
+                                            firestore.collection("plants").document(document.id).update(
+                                                mapOf("species" to plant.species, "name" to plant.name, "sensor" to plant.sensorName, "valve" to plant.valve)
+                                            )
+                                        }
+                                    } else
+                                        Log.d("Firestore", "FAILURE")
+                                }
+
+                            firestore.collection("plants").document()
 
                             // Change the state to close the dialog
                             setShowDialog(false)
