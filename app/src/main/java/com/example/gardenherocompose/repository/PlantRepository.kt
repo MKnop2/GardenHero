@@ -25,7 +25,7 @@ class PlantRepository {
                     output.add(Plant(
                         id = it.id,
                         name = "Test",
-                                picture = R.drawable.pic_cannabis,
+                        picture = R.drawable.pic_cannabis,
                         species = "Cannabis",
                         minWaterLevel = 60,
                         maxWaterLevel = 85,

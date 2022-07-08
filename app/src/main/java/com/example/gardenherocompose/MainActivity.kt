@@ -55,7 +55,10 @@ class MainActivity : ComponentActivity() {
                             verticalArrangement = Arrangement.spacedBy(12.dp)
                         )  {
                             getAllData.observeForever {
+                                Log.d("FirebaseSize", it.size.toString())
+                                Log.d("FirebasePlantName", it[0].name)
                                 items(items = it) { plant ->
+                                    //Log.d("FirebasePlantName", it[0].name)
                                     ExpandableCard(plant = plant)
                                 }
                             }
