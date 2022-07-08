@@ -52,7 +52,6 @@ fun ExpandableCard(
     titleFontWeight: FontWeight = FontWeight.Bold,
     descriptionFontSize: TextUnit = MaterialTheme.typography.subtitle1.fontSize,
     descriptionFontWeight: FontWeight = FontWeight.Normal,
-    //descriptionMaxLines: Int = 4,
     shape: CornerBasedShape = Shapes.medium,
     padding: Dp = 3.dp
 ) {

@@ -2,6 +2,7 @@ package com.example.gardenherocompose
 
 import android.annotation.SuppressLint
 import android.os.Bundle
+import android.provider.SyncStateContract.Helpers.update
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -13,6 +14,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -30,6 +32,9 @@ import com.example.gardenherocompose.ui.theme.*
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreSettings
 
+private val plantRepository = PlantRepository()
+private val plantList = mutableStateListOf<Plant>()
+
 class MainActivity : ComponentActivity() {
 
     //private val viewModel: MainViewModel by viewModel<MainViewModel>()
@@ -45,10 +50,10 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colors.background
                 ) {
 
-                    val plantRepository = PlantRepository()
+
                     val getAllData = plantRepository.getDataFromFirestore()
-                    val plantList = mutableStateListOf<Plant>()
-                    getAllData.observe(this) { plantList.addAll(it) }
+
+                    getAllData.observe(this) { plantList.swapList(it) }
                     Column() {
                         Text(modifier = Modifier.padding(12.dp,2.dp,12.dp,0.dp),text = "GardenHero Design 1.4", color = MaterialTheme.colors.primary, fontSize = MaterialTheme.typography.h5.fontSize, fontWeight = FontWeight.Bold)
                         LazyColumn(
@@ -61,7 +66,6 @@ class MainActivity : ComponentActivity() {
 
                                 items(items = plantList) { plant ->
                                     ExpandableCard(plant = plant)
-
                             }
 
                         }
@@ -109,6 +113,11 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
+}
+
+fun <T> SnapshotStateList<T>.swapList(newList: List<T>){
+    clear()
+    addAll(newList)
 }
 
 @Composable
@@ -206,6 +215,8 @@ fun AddDialog(showDialog: Boolean, setShowDialog: (Boolean) -> Unit){
                                 "added $addName to list",
                                 Toast.LENGTH_LONG
                             ).show()
+
+                            plantList.add(plant)
                             // Change the state to close the dialog
                             setShowDialog(false)
                         },
@@ -308,6 +319,8 @@ fun DeleteDialog(showDialog: Boolean, setShowDialog: (Boolean) -> Unit){
                                             document ->
                                                 firestore.collection("plants").document(document.id).delete()
                                         }
+                                        val targetIndex = plantList.indexOfFirst { it.name == deleteByName }
+                                        plantList.removeAt(targetIndex)
                                     } else
                                         Log.d("Firestore", "FAILURE")
                                 }
