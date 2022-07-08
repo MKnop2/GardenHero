@@ -26,6 +26,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.gardenherocompose.helper.MqttClientHelper
 import com.example.gardenherocompose.model.Plant
 import com.example.gardenherocompose.repository.PlantRepository
 import com.example.gardenherocompose.ui.theme.*
@@ -42,6 +43,7 @@ class MainActivity : ComponentActivity() {
     @SuppressLint("UnrememberedMutableState")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        MqttClientHelper(applicationContext)
         setContent {
             GardenHeroComposeTheme {
                 // A surface container using the 'background' color from the theme
