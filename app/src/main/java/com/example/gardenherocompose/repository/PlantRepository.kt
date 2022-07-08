@@ -1,11 +1,50 @@
 package com.example.gardenherocompose.repository
 
+import android.util.Log
 import androidx.compose.ui.res.painterResource
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import com.example.gardenherocompose.R
 import com.example.gardenherocompose.model.Plant
+import com.google.firebase.firestore.FirebaseFirestore
 import java.util.*
+import kotlin.collections.ArrayList
 
 class PlantRepository {
+    fun getDataFromFirestore(): LiveData<List<Plant>> {
+        val firestore = FirebaseFirestore.getInstance()
+        val liveData = MutableLiveData<List<Plant>>()
+
+        firestore.collection("plants").get()
+            .addOnSuccessListener { getResult ->
+                val result = getResult.documents
+
+                val output = ArrayList<Plant>()
+
+                result.forEach {
+                    output.add(Plant(
+                        id = it.id,
+                        name = "Test",
+                                picture = R.drawable.pic_cannabis,
+                        species = "Cannabis",
+                        minWaterLevel = 60,
+                        maxWaterLevel = 85,
+                        currentWaterLevel = 62,
+                        lastPour = Date(),
+                        nextPour = Date(),
+                        sensorName = "Sensor1",
+                        valve = 1
+                    ))
+                }
+
+                Log.d("Firestore", result.size.toString())
+
+                liveData.value = output
+            }
+
+        return liveData
+    }
+
     fun getAllData(): List<Plant> {
         return listOf(
             Plant(
