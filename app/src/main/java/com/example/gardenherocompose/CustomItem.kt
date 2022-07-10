@@ -14,7 +14,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.gardenherocompose.model.Plant
-import androidx.compose.foundation.layout.*
 import androidx.compose.material.MaterialTheme
 import java.util.*
 
@@ -63,8 +62,7 @@ fun CustomItemPreview() {
             minWaterLevel = 60,
             maxWaterLevel = 85,
             currentWaterLevel = 62,
-            lastPour = Date(),
-            nextPour = Date(),
+            addedDate = Date(),
             sensorName = "Sensor1",
             valve = 1,
         )

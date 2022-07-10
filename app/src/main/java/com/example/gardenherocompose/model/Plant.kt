@@ -8,14 +8,13 @@ import java.util.*
 
 data class Plant(@SerializedName("name")
     var id: String = "0",
-                 var picture: Int = R.drawable.pic_cannabis,
+                 var picture: Int = R.drawable.pic_mint,
                  var name: String = "",
                  var species: String = "",
-                 val minWaterLevel: Int = 0,
-                 val maxWaterLevel: Int = 0,
-                 var currentWaterLevel: Int = 0,
-                 var lastPour: Date = Date(),
-                 var nextPour: Date = Date(),
+                 var minWaterLevel: Int = 0,
+                 var maxWaterLevel: Int = 0,
+                 var currentWaterLevel: Int = 50,
+                 var addedDate: Date = Date(),
                  var sensorName: String = "",
                  var valve: Int = 0
 )

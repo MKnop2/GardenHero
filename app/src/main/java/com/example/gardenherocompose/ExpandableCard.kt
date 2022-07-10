@@ -1,13 +1,12 @@
 package com.example.gardenherocompose
 
 import android.util.Log
-import android.widget.ImageButton
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.CornerBasedShape
@@ -16,7 +15,8 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -26,18 +26,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.TextUnit
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import coil.compose.ImagePainter.State.Empty.painter
+import androidx.compose.ui.unit.*
 import com.example.gardenherocompose.model.Plant
 import com.example.gardenherocompose.ui.theme.Shapes
 import com.example.gardenherocompose.ui.theme.light_grey
@@ -220,27 +219,13 @@ fun ExpandableCard(
                     }
                     Row() {
                         Text( modifier = androidx.compose.ui.Modifier.weight(3f),
-                            text = "Last pour: ",
+                            text = "Added on: ",
                             fontSize = descriptionFontSize,
                             fontWeight = descriptionFontWeight,
                             //maxLines = descriptionMaxLines,
                             overflow = TextOverflow.Ellipsis)
                         Text( modifier = androidx.compose.ui.Modifier.weight(6f),
-                            text = plant.lastPour.toString(),
-                            fontSize = descriptionFontSize,
-                            fontWeight = descriptionFontWeight,
-                            //maxLines = descriptionMaxLines,
-                            overflow = TextOverflow.Ellipsis)
-                    }
-                    Row() {
-                        Text( modifier = androidx.compose.ui.Modifier.weight(3f),
-                            text = "Next pour: ",
-                            fontSize = descriptionFontSize,
-                            fontWeight = descriptionFontWeight,
-                            //maxLines = descriptionMaxLines,
-                            overflow = TextOverflow.Ellipsis)
-                        Text( modifier = androidx.compose.ui.Modifier.weight(6f),
-                            text = plant.nextPour.toString(),
+                            text = plant.addedDate.toString(),
                             fontSize = descriptionFontSize,
                             fontWeight = descriptionFontWeight,
                             //maxLines = descriptionMaxLines,
@@ -303,6 +288,12 @@ fun EditDialog(showDialog: Boolean, setShowDialog: (Boolean) -> Unit, plant: Pla
 
                             val firestore = FirebaseFirestore.getInstance()
 
+                            when (plant.species) {
+                                "Trockenpflanze"   -> {plant.minWaterLevel = 10; plant.maxWaterLevel = 30; plant.picture = R.drawable.pic_trockenpflanze}
+                                "Feuchtpflanze"    -> {plant.minWaterLevel = 40; plant.maxWaterLevel = 60; plant.picture = R.drawable.pic_feuchtpflanze}
+                                "Sumpfpflanze"     -> {plant.minWaterLevel = 70; plant.maxWaterLevel = 80; plant.picture = R.drawable.pic_sumpfpflanze}
+                            }
+
                             firestore.collection("plants").whereIn("name", listOf(oldName))
                                 .get()
                                 .addOnCompleteListener {
@@ -314,7 +305,13 @@ fun EditDialog(showDialog: Boolean, setShowDialog: (Boolean) -> Unit, plant: Pla
                                             Log.d("Ausgabe", "TRUE")
 
                                             firestore.collection("plants").document(document.id).update(
-                                                mapOf("species" to plant.species, "name" to plant.name, "sensor" to plant.sensorName, "valve" to plant.valve)
+                                                mapOf("species" to plant.species,
+                                                    "name" to plant.name,
+                                                    "sensor" to plant.sensorName,
+                                                    "valve" to plant.valve,
+                                                    "maxWaterLevel" to plant.maxWaterLevel,
+                                                    "minWaterLevel" to plant.minWaterLevel,
+                                                    "picture" to plant.picture)
                                             )
                                         }
                                     } else
@@ -342,15 +339,44 @@ fun EditDialog(showDialog: Boolean, setShowDialog: (Boolean) -> Unit, plant: Pla
             text = {
                 Column() {
                     Row() {
+                        var mExpanded by remember { mutableStateOf(false) }
+                        val mSpecies = listOf("Trockenpflanze", "Feuchtpflanze", "Sumpfpflanze")
+                        var mTextFieldSize by remember { mutableStateOf(Size.Zero)}
+                        val icon = if (mExpanded)
+                            Icons.Filled.KeyboardArrowUp
+                        else
+                            Icons.Filled.KeyboardArrowDown
                         OutlinedTextField(value = species, onValueChange = { newText ->
                             species = newText
                         },
-                            placeholder = {Text(text = plant.species)},
+                            modifier = Modifier
+                                .onGloballyPositioned { coordiantes -> mTextFieldSize = coordiantes.size.toSize() },
+                            placeholder = {Text(text = "Species: ")},
+                            //label = { Text(stringResource(R.string.addSpecies))},
                             label = { Text(text = "Species: ")},
                             keyboardOptions = KeyboardOptions(
                                 keyboardType = KeyboardType.Text
-                            )
+                            ),
+                            trailingIcon = {
+                                Icon(icon,"contentDescription",
+                                    Modifier.clickable { mExpanded = !mExpanded })
+                            }
                         )
+                        DropdownMenu(
+                            expanded = mExpanded,
+                            onDismissRequest = { mExpanded = false },
+                            modifier = Modifier
+                                .width(with(LocalDensity.current){mTextFieldSize.width.toDp()})
+                        ) {
+                            mSpecies.forEach { label ->
+                                DropdownMenuItem(onClick = {
+                                    species = label
+                                    mExpanded = false
+                                }) {
+                                    Text(text = label)
+                                }
+                            }
+                        }
                     }
                     Row() {
                         OutlinedTextField(value = name, onValueChange = { newText ->
@@ -403,8 +429,7 @@ fun ExpandableCardPreview(){
             minWaterLevel = 60,
             maxWaterLevel = 85,
             currentWaterLevel = 62,
-            lastPour = Date(),
-            nextPour = Date(),
+            addedDate = Date(),
             sensorName = "Sensor1",
             valve = 1
         ),

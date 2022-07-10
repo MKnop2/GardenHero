@@ -1,7 +1,6 @@
 package com.example.gardenherocompose.repository
 
 import android.util.Log
-import androidx.compose.ui.res.painterResource
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.example.gardenherocompose.R
@@ -24,8 +23,7 @@ class PlantRepository {
                 result.forEach {
                     Log.d("FB",  it.toString())
                     val tempPlant = it.toObject(Plant::class.java)
-                    tempPlant!!.picture = R.drawable.pic_cannabis
-                    output.add(tempPlant)
+                    output.add(tempPlant!!)
                 }
 
                 Log.d("Firestore", result.size.toString())
@@ -46,8 +44,7 @@ class PlantRepository {
                 minWaterLevel = 60,
                 maxWaterLevel = 85,
                 currentWaterLevel = 62,
-                lastPour = Date(),
-                nextPour = Date(),
+                addedDate = Date(),
                 sensorName = "Sensor1",
                 valve = 1
             ),
@@ -59,8 +56,7 @@ class PlantRepository {
                 minWaterLevel = 70,
                 maxWaterLevel = 90,
                 currentWaterLevel = 85,
-                lastPour = Date(),
-                nextPour = Date(),
+                addedDate = Date(),
                 sensorName = "Sensor2",
                 valve = 2
             ),
@@ -72,8 +68,7 @@ class PlantRepository {
                 minWaterLevel = 30,
                 maxWaterLevel = 40,
                 currentWaterLevel = 34,
-                lastPour = Date(),
-                nextPour = Date(),
+                addedDate = Date(),
                 sensorName = "Sensor3",
                 valve = 3
             ),
@@ -85,8 +80,7 @@ class PlantRepository {
                 minWaterLevel = 55,
                 maxWaterLevel = 95,
                 currentWaterLevel = 60,
-                lastPour = Date(),
-                nextPour = Date(),
+                addedDate = Date(),
                 sensorName = "Sensor4",
                 valve = 4
             ),
@@ -98,8 +92,7 @@ class PlantRepository {
                 minWaterLevel = 55,
                 maxWaterLevel = 95,
                 currentWaterLevel = 90,
-                lastPour = Date(),
-                nextPour = Date(),
+                addedDate = Date(),
                 sensorName = "Sensor5",
                 valve = 5
             ),
@@ -111,8 +104,7 @@ class PlantRepository {
                 minWaterLevel = 55,
                 maxWaterLevel = 95,
                 currentWaterLevel = 80,
-                lastPour = Date(),
-                nextPour = Date(),
+                addedDate = Date(),
                 sensorName = "Sensor6",
                 valve = 6
             ),
@@ -124,8 +116,7 @@ class PlantRepository {
                 minWaterLevel = 35,
                 maxWaterLevel = 55,
                 currentWaterLevel = 37,
-                lastPour = Date(),
-                nextPour = Date(),
+                addedDate = Date(),
                 sensorName = "Sensor6",
                 valve = 7
             ),
@@ -137,8 +128,7 @@ class PlantRepository {
                 minWaterLevel = 55,
                 maxWaterLevel = 95,
                 currentWaterLevel = 80,
-                lastPour = Date(),
-                nextPour = Date(),
+                addedDate = Date(),
                 sensorName = "Sensor6",
                 valve = 8
             ),
@@ -150,8 +140,7 @@ class PlantRepository {
                 minWaterLevel = 55,
                 maxWaterLevel = 95,
                 currentWaterLevel = 80,
-                lastPour = Date(),
-                nextPour = Date(),
+                addedDate = Date(),
                 sensorName = "Sensor6",
                 valve = 9
             ),
@@ -163,8 +152,7 @@ class PlantRepository {
                 minWaterLevel = 55,
                 maxWaterLevel = 95,
                 currentWaterLevel = 80,
-                lastPour = Date(),
-                nextPour = Date(),
+                addedDate = Date(),
                 sensorName = "Sensor6",
                 valve = 10
             ),

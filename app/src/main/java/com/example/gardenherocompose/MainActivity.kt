@@ -1,18 +1,25 @@
 package com.example.gardenherocompose
 
 import android.annotation.SuppressLint
+import android.app.ProgressDialog.show
+import android.os.Build
 import android.os.Bundle
 import android.provider.SyncStateContract.Helpers.update
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.runtime.*
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
@@ -31,6 +38,10 @@ import com.example.gardenherocompose.repository.PlantRepository
 import com.example.gardenherocompose.ui.theme.*
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreSettings
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.toSize
 
 private val plantRepository = PlantRepository()
 private val plantList = mutableStateListOf<Plant>()
@@ -39,6 +50,7 @@ class MainActivity : ComponentActivity() {
 
     //private val viewModel: MainViewModel by viewModel<MainViewModel>()
 
+    @RequiresApi(Build.VERSION_CODES.O)
     @SuppressLint("UnrememberedMutableState")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -120,6 +132,7 @@ fun <T> SnapshotStateList<T>.swapList(newList: List<T>){
     addAll(newList)
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun GradientButtonLeft(
     text: String,
@@ -181,6 +194,7 @@ fun GradientButtonRight(
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun AddDialog(showDialog: Boolean, setShowDialog: (Boolean) -> Unit){
     val context = LocalContext.current
@@ -207,6 +221,12 @@ fun AddDialog(showDialog: Boolean, setShowDialog: (Boolean) -> Unit){
                             firestore.firestoreSettings = FirebaseFirestoreSettings.Builder().build()
                             val document = firestore.collection("plants").document()
                             plant.id = document.id
+                            when (plant.species) {
+                                "Trockenpflanze"   -> {plant.minWaterLevel = 10; plant.maxWaterLevel = 30; plant.picture = R.drawable.pic_trockenpflanze}
+                                "Feuchtpflanze"    -> {plant.minWaterLevel = 40; plant.maxWaterLevel = 60; plant.picture = R.drawable.pic_feuchtpflanze}
+                                "Sumpfpflanze"     -> {plant.minWaterLevel = 70; plant.maxWaterLevel = 80; plant.picture = R.drawable.pic_sumpfpflanze}
+                            }
+                            //TODO: get Currentvalue from Sensor
                             val handle = document.set(plant)
                             handle.addOnSuccessListener { Log.d("Firebase", "Document saved") }
                             handle.addOnFailureListener { Log.d("Firebase", "Save failed $it") }
@@ -241,16 +261,44 @@ fun AddDialog(showDialog: Boolean, setShowDialog: (Boolean) -> Unit){
             text = {
                 Column() {
                     Row() {
+                        var mExpanded by remember { mutableStateOf(false) }
+                        val mSpecies = listOf("Trockenpflanze", "Feuchtpflanze", "Sumpfpflanze")
+                        var mTextFieldSize by remember { mutableStateOf(Size.Zero)}
+                        val icon = if (mExpanded)
+                            Icons.Filled.KeyboardArrowUp
+                        else
+                            Icons.Filled.KeyboardArrowDown
                         OutlinedTextField(value = addSpecies, onValueChange = { newText ->
                             addSpecies = newText
                         },
+                            modifier = Modifier
+                                .onGloballyPositioned { coordiantes -> mTextFieldSize = coordiantes.size.toSize() },
                             placeholder = {Text(text = "Species: ")},
                             //label = { Text(stringResource(R.string.addSpecies))},
                             label = { Text(text = "Species: ")},
                             keyboardOptions = KeyboardOptions(
                                 keyboardType = KeyboardType.Text
-                            )
+                            ),
+                            trailingIcon = {
+                                Icon(icon,"contentDescription",
+                                    Modifier.clickable { mExpanded = !mExpanded })
+                            }
                         )
+                        DropdownMenu(
+                            expanded = mExpanded,
+                            onDismissRequest = { mExpanded = false },
+                            modifier = Modifier
+                                .width(with(LocalDensity.current){mTextFieldSize.width.toDp()})
+                        ) {
+                            mSpecies.forEach { label ->
+                                DropdownMenuItem(onClick = {
+                                    addSpecies = label
+                                    mExpanded = false
+                                }) {
+                                    Text(text = label)
+                                }
+                            }
+                        }
                     }
                     Row() {
                         OutlinedTextField(value = addName, onValueChange = { newText ->
