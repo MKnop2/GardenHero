@@ -9,13 +9,7 @@ import org.eclipse.paho.client.mqttv3.*
 //Tutorial MQTT
 //https://www.hivemq.com/blog/mqtt-client-library-enyclopedia-paho-android-service/
 
-fun MqttClientHelper(context: Context) {
-    val clientId = MqttClient.generateClientId()
-    val client = MqttAndroidClient(
-        context, "tcp://broker.hivemq.com:1883",
-        clientId
-    )
-
+fun MqttClientHelper(client:MqttAndroidClient ,context: Context) {
     try {
         val token = client.connect()
         token.actionCallback = object : IMqttActionListener {

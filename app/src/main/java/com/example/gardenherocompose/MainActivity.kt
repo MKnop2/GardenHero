@@ -32,6 +32,8 @@ import com.example.gardenherocompose.repository.PlantRepository
 import com.example.gardenherocompose.ui.theme.*
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreSettings
+import org.eclipse.paho.android.service.MqttAndroidClient
+import org.eclipse.paho.client.mqttv3.MqttClient
 
 private val plantRepository = PlantRepository()
 private val plantList = mutableStateListOf<Plant>()
@@ -43,7 +45,14 @@ class MainActivity : ComponentActivity() {
     @SuppressLint("UnrememberedMutableState")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        MqttClientHelper(applicationContext)
+        //Global mqtt-client initialization
+        val clientId = MqttClient.generateClientId()
+        val client = MqttAndroidClient(
+            applicationContext, "tcp://broker.hivemq.com:1883",
+            clientId
+        )
+
+        MqttClientHelper(client, applicationContext)
         setContent {
             GardenHeroComposeTheme {
                 // A surface container using the 'background' color from the theme
