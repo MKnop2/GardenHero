@@ -13,7 +13,7 @@ data class Plant(@SerializedName("name")
                  var species: String = "",
                  var minWaterLevel: Int = 0,
                  var maxWaterLevel: Int = 0,
-                 var currentWaterLevel: Int = 50,
+                 var currentWaterLevel: Int = 0,
                  var addedDate: Date = Date(),
                  var sensorName: String = "",
                  var valve: Int = 0

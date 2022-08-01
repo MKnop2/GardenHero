@@ -42,6 +42,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.toSize
+import com.google.firebase.database.FirebaseDatabase
 
 private val plantRepository = PlantRepository()
 private val plantList = mutableStateListOf<Plant>()
@@ -218,15 +219,26 @@ fun AddDialog(showDialog: Boolean, setShowDialog: (Boolean) -> Unit){
                                     sensorName = addSensorName,
                                     valve = addValve.toInt())
                             val firestore = FirebaseFirestore.getInstance()
+
                             firestore.firestoreSettings = FirebaseFirestoreSettings.Builder().build()
                             val document = firestore.collection("plants").document()
                             plant.id = document.id
                             when (plant.species) {
-                                "Trockenpflanze"   -> {plant.minWaterLevel = 10; plant.maxWaterLevel = 30; plant.picture = R.drawable.pic_trockenpflanze}
-                                "Feuchtpflanze"    -> {plant.minWaterLevel = 40; plant.maxWaterLevel = 60; plant.picture = R.drawable.pic_feuchtpflanze}
-                                "Sumpfpflanze"     -> {plant.minWaterLevel = 70; plant.maxWaterLevel = 80; plant.picture = R.drawable.pic_sumpfpflanze}
+                                "Trockenpflanze"   -> {plant.minWaterLevel = 30; plant.maxWaterLevel = 50; plant.picture = R.drawable.pic_trockenpflanze}
+                                "Feuchtpflanze"    -> {plant.minWaterLevel = 60; plant.maxWaterLevel = 80; plant.picture = R.drawable.pic_feuchtpflanze}
+                                "Sumpfpflanze"     -> {plant.minWaterLevel = 90; plant.maxWaterLevel = 100; plant.picture = R.drawable.pic_sumpfpflanze}
                             }
-                            //TODO: get Currentvalue from Sensor
+
+                            val database = FirebaseDatabase.getInstance()
+                            database.getReference("plants/config/${plant.name}/MessageTag").setValue(plant.sensorName)
+                            database.getReference("plants/config/${plant.name}/Species").setValue(plant.species)
+                            database.getReference("plants/config/${plant.name}/MinMoisture").setValue(plant.minWaterLevel)
+                            database.getReference("plants/config/${plant.name}/MaxMoisture").setValue(plant.maxWaterLevel)
+                            database.getReference("plants/config/${plant.name}/Valve").setValue(plant.valve)
+
+                            database.getReference("plants/measure/${plant.name}/MessageTag").setValue(plant.sensorName)
+                            database.getReference("plants/measure/${plant.name}/Moisture").setValue(plant.currentWaterLevel)
+
                             val handle = document.set(plant)
                             handle.addOnSuccessListener { Log.d("Firebase", "Document saved") }
                             handle.addOnFailureListener { Log.d("Firebase", "Save failed $it") }
@@ -356,6 +368,9 @@ fun DeleteDialog(showDialog: Boolean, setShowDialog: (Boolean) -> Unit){
                         onClick = {
                             val firestore = FirebaseFirestore.getInstance()
                             firestore.firestoreSettings = FirebaseFirestoreSettings.Builder().build()
+                            val database = FirebaseDatabase.getInstance()
+                            database.getReference("plants/config/$deleteByName").removeValue()
+                            database.getReference("plants/measure/$deleteByName").removeValue()
 
                             firestore.collection("plants").whereIn("name", listOf(deleteByName))
                                 .get()

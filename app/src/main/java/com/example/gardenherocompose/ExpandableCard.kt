@@ -40,6 +40,10 @@ import androidx.compose.ui.unit.*
 import com.example.gardenherocompose.model.Plant
 import com.example.gardenherocompose.ui.theme.Shapes
 import com.example.gardenherocompose.ui.theme.light_grey
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
 import com.google.firebase.firestore.FirebaseFirestore
 import java.util.*
 
@@ -57,6 +61,19 @@ fun ExpandableCard(
     var expandedState by remember { mutableStateOf(false) }
     val rotationState by animateFloatAsState(
         targetValue = if(expandedState) 180f else 0f)
+    val database = FirebaseDatabase.getInstance()
+    val moisture = database.getReference("plants/measure/${plant.name}/Moisture")
+    moisture.addValueEventListener(object : ValueEventListener {
+        override fun onDataChange(dataSnapshot: DataSnapshot) {
+            val value = dataSnapshot.value
+            Log.d("UPDATE", "${plant.name} value is: $value")
+        }
+
+        override fun onCancelled(error: DatabaseError) {
+            Log.w("UPDATE", "Failed to read value.", error.toException())
+        }
+    })
+
     Card(
         modifier = androidx.compose.ui.Modifier
             .fillMaxWidth()
@@ -138,7 +155,7 @@ fun ExpandableCard(
                             Text(
                                 modifier = androidx.compose.ui.Modifier
                                     .weight(1.5f),
-                                text = "Now:" + plant.currentWaterLevel.toString(),
+                                text = "Now: " + moisture.get(),
                                 color = Color.Black,
                                 fontSize = 16.sp,
                                 fontWeight = FontWeight.Bold
@@ -211,7 +228,7 @@ fun ExpandableCard(
                             //maxLines = descriptionMaxLines,
                             overflow = TextOverflow.Ellipsis)
                         Text( modifier = androidx.compose.ui.Modifier.weight(6f),
-                            text = plant.currentWaterLevel.toString() + "%",
+                            text = moisture.toString() + "%",
                             fontSize = descriptionFontSize,
                             fontWeight = descriptionFontWeight,
                             //maxLines = descriptionMaxLines,
@@ -287,6 +304,7 @@ fun EditDialog(showDialog: Boolean, setShowDialog: (Boolean) -> Unit, plant: Pla
                             plant.valve = valve.toInt()
 
                             val firestore = FirebaseFirestore.getInstance()
+                            val database = FirebaseDatabase.getInstance()
 
                             when (plant.species) {
                                 "Trockenpflanze"   -> {plant.minWaterLevel = 10; plant.maxWaterLevel = 30; plant.picture = R.drawable.pic_trockenpflanze}
@@ -313,6 +331,12 @@ fun EditDialog(showDialog: Boolean, setShowDialog: (Boolean) -> Unit, plant: Pla
                                                     "minWaterLevel" to plant.minWaterLevel,
                                                     "picture" to plant.picture)
                                             )
+
+                                            database.getReference("plants/config/${plant.name}/MessageTag").setValue(plant.sensorName)
+                                            database.getReference("plants/config/${plant.name}/Species").setValue(plant.species)
+                                            database.getReference("plants/config/${plant.name}/MinMoisture").setValue(plant.minWaterLevel)
+                                            database.getReference("plants/config/${plant.name}/MaxMoisture").setValue(plant.maxWaterLevel)
+                                            database.getReference("plants/config/${plant.name}/Valve").setValue(plant.valve)
                                         }
                                     } else
                                         Log.d("Firestore", "FAILURE")
