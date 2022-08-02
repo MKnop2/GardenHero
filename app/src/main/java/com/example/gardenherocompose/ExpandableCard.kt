@@ -61,18 +61,7 @@ fun ExpandableCard(
     var expandedState by remember { mutableStateOf(false) }
     val rotationState by animateFloatAsState(
         targetValue = if(expandedState) 180f else 0f)
-    val database = FirebaseDatabase.getInstance()
-    val moisture = database.getReference("plants/measure/${plant.name}/Moisture")
-    moisture.addValueEventListener(object : ValueEventListener {
-        override fun onDataChange(dataSnapshot: DataSnapshot) {
-            val value = dataSnapshot.value
-            Log.d("UPDATE", "${plant.name} value is: $value")
-        }
 
-        override fun onCancelled(error: DatabaseError) {
-            Log.w("UPDATE", "Failed to read value.", error.toException())
-        }
-    })
 
     Card(
         modifier = androidx.compose.ui.Modifier
@@ -118,13 +107,14 @@ fun ExpandableCard(
                     Column(
                         modifier = androidx.compose.ui.Modifier
                             .height(70.dp)
+                            .padding(0.dp, 5.dp, 0.dp , 5.dp)
                     ) {
                         Text(
                             modifier = androidx.compose.ui.Modifier
                                 .weight(1f),
                             text = plant.species,
                             color = Color.Black,
-                            fontSize = 12.sp,
+                            fontSize = 13.sp,
                             fontWeight = FontWeight.Bold
                         )
                         Text(
@@ -135,7 +125,7 @@ fun ExpandableCard(
                             fontSize = MaterialTheme.typography.h6.fontSize,
                             fontWeight = FontWeight.Bold
                         )
-                        Row() {
+                        /*Row() {
                             Text(
                                 modifier = androidx.compose.ui.Modifier
                                     .weight(1.5f),
@@ -155,11 +145,24 @@ fun ExpandableCard(
                             Text(
                                 modifier = androidx.compose.ui.Modifier
                                     .weight(1.5f),
-                                text = "Now: " + moisture.get(),
+                                text = "Now: " + plant.currentWaterLevel.toString(),
                                 color = Color.Black,
                                 fontSize = 16.sp,
                                 fontWeight = FontWeight.Bold
                             )
+                        }*/
+                        var progress = plant.currentWaterLevel.toString().toFloat()
+
+                        when (plant.species) {
+                            "Trockenpflanze"   -> {progress = ((progress-20))/20}
+                            "Feuchtpflanze"    -> {progress = ((progress-60))/20}
+                            "Sumpfpflanze"     -> {progress = ((progress-80))/20}
+                        }
+                        Log.d("UPDATE", "progress from ${plant.name} is: $progress")
+                        when (plant.species) {
+                            "Trockenpflanze"   -> {LinearProgressIndicator(progress = progress, modifier = Modifier.height(7.dp).weight(0.75f))}
+                            "Feuchtpflanze"    -> {LinearProgressIndicator(progress = progress, modifier = Modifier.height(7.dp).weight(0.75f))}
+                            "Sumpfpflanze"     -> {LinearProgressIndicator(progress = progress, modifier = Modifier.height(7.dp).weight(0.75f))}
                         }
                     }
                 }
@@ -228,7 +231,7 @@ fun ExpandableCard(
                             //maxLines = descriptionMaxLines,
                             overflow = TextOverflow.Ellipsis)
                         Text( modifier = androidx.compose.ui.Modifier.weight(6f),
-                            text = moisture.toString() + "%",
+                            text = plant.currentWaterLevel.toString() + "% (Range: " + plant.minWaterLevel.toString() + "% bis " + plant.maxWaterLevel.toString() + "%)",
                             fontSize = descriptionFontSize,
                             fontWeight = descriptionFontWeight,
                             //maxLines = descriptionMaxLines,
@@ -236,7 +239,7 @@ fun ExpandableCard(
                     }
                     Row() {
                         Text( modifier = androidx.compose.ui.Modifier.weight(3f),
-                            text = "Added on: ",
+                            text = "Hinzugefügt: ",
                             fontSize = descriptionFontSize,
                             fontWeight = descriptionFontWeight,
                             //maxLines = descriptionMaxLines,
@@ -250,7 +253,7 @@ fun ExpandableCard(
                     }
                     Row() {
                         Text( modifier = Modifier.weight(3f),
-                            text = "Sensor name: ",
+                            text = "Sensor: ",
                             fontSize = descriptionFontSize,
                             fontWeight = descriptionFontWeight,
                             overflow = TextOverflow.Ellipsis)
@@ -307,9 +310,9 @@ fun EditDialog(showDialog: Boolean, setShowDialog: (Boolean) -> Unit, plant: Pla
                             val database = FirebaseDatabase.getInstance()
 
                             when (plant.species) {
-                                "Trockenpflanze"   -> {plant.minWaterLevel = 10; plant.maxWaterLevel = 30; plant.picture = R.drawable.pic_trockenpflanze}
-                                "Feuchtpflanze"    -> {plant.minWaterLevel = 40; plant.maxWaterLevel = 60; plant.picture = R.drawable.pic_feuchtpflanze}
-                                "Sumpfpflanze"     -> {plant.minWaterLevel = 70; plant.maxWaterLevel = 80; plant.picture = R.drawable.pic_sumpfpflanze}
+                                "Trockenpflanze"   -> {plant.minWaterLevel = 20; plant.maxWaterLevel = 40; plant.currentWaterLevel = 20; plant.picture = R.drawable.pic_trockenpflanze}
+                                "Feuchtpflanze"    -> {plant.minWaterLevel = 60; plant.maxWaterLevel = 80; plant.currentWaterLevel = 60; plant.picture = R.drawable.pic_feuchtpflanze}
+                                "Sumpfpflanze"     -> {plant.minWaterLevel = 80; plant.maxWaterLevel = 100; plant.currentWaterLevel = 80; plant.picture = R.drawable.pic_sumpfpflanze}
                             }
 
                             firestore.collection("plants").whereIn("name", listOf(oldName))

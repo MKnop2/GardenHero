@@ -42,7 +42,10 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.toSize
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
 
 private val plantRepository = PlantRepository()
 private val plantList = mutableStateListOf<Plant>()
@@ -65,8 +68,27 @@ class MainActivity : ComponentActivity() {
 
 
                     val getAllData = plantRepository.getDataFromFirestore()
+                    val database = FirebaseDatabase.getInstance()
 
-                    getAllData.observe(this) { plantList.swapList(it) }
+                    getAllData.observe(this) {
+                        for (plant in it) {
+                            val moisture = database.getReference("plants/measure/${plant.name}/Moisture")
+                            moisture.addValueEventListener(object : ValueEventListener {
+                                override fun onDataChange(dataSnapshot: DataSnapshot) {
+                                    if (dataSnapshot.value != null){
+                                        plant.currentWaterLevel = dataSnapshot.value.toString().toInt()
+                                        plantList.swapList(it)
+                                        val value = dataSnapshot.value
+                                        Log.d("UPDATE", "${plant.name} value is: $value")
+                                    }
+                                }
+
+                                override fun onCancelled(error: DatabaseError) {
+                                    Log.w("UPDATE", "Failed to read value.", error.toException())
+                                }
+                            })
+
+                        }}
                     Column() {
                         Text(modifier = Modifier.padding(12.dp,2.dp,12.dp,0.dp),text = "GardenHero Design 1.4", color = MaterialTheme.colors.primary, fontSize = MaterialTheme.typography.h5.fontSize, fontWeight = FontWeight.Bold)
                         LazyColumn(
@@ -224,9 +246,9 @@ fun AddDialog(showDialog: Boolean, setShowDialog: (Boolean) -> Unit){
                             val document = firestore.collection("plants").document()
                             plant.id = document.id
                             when (plant.species) {
-                                "Trockenpflanze"   -> {plant.minWaterLevel = 30; plant.maxWaterLevel = 50; plant.picture = R.drawable.pic_trockenpflanze}
-                                "Feuchtpflanze"    -> {plant.minWaterLevel = 60; plant.maxWaterLevel = 80; plant.picture = R.drawable.pic_feuchtpflanze}
-                                "Sumpfpflanze"     -> {plant.minWaterLevel = 90; plant.maxWaterLevel = 100; plant.picture = R.drawable.pic_sumpfpflanze}
+                                "Trockenpflanze"   -> {plant.minWaterLevel = 20; plant.maxWaterLevel = 40; plant.currentWaterLevel = 21; plant.picture = R.drawable.pic_trockenpflanze}
+                                "Feuchtpflanze"    -> {plant.minWaterLevel = 60; plant.maxWaterLevel = 80; plant.currentWaterLevel = 61; plant.picture = R.drawable.pic_feuchtpflanze}
+                                "Sumpfpflanze"     -> {plant.minWaterLevel = 80; plant.maxWaterLevel = 100; plant.currentWaterLevel = 81; plant.picture = R.drawable.pic_sumpfpflanze}
                             }
 
                             val database = FirebaseDatabase.getInstance()
@@ -239,6 +261,10 @@ fun AddDialog(showDialog: Boolean, setShowDialog: (Boolean) -> Unit){
                             database.getReference("plants/measure/${plant.name}/MessageTag").setValue(plant.sensorName)
                             database.getReference("plants/measure/${plant.name}/Moisture").setValue(plant.currentWaterLevel)
 
+                            database.getReference("plants/configStatus/isDirty").setValue(true)
+                            database.getReference("plants/configStatus/MessageTag").setValue(plant.name)
+                            database.getReference("plants/configStatus/toDelete").setValue(false)
+
                             val handle = document.set(plant)
                             handle.addOnSuccessListener { Log.d("Firebase", "Document saved") }
                             handle.addOnFailureListener { Log.d("Firebase", "Save failed $it") }
@@ -247,9 +273,6 @@ fun AddDialog(showDialog: Boolean, setShowDialog: (Boolean) -> Unit){
                                 "added $addName to list",
                                 Toast.LENGTH_LONG
                             ).show()
-
-                            plantList.add(plant)
-                            // Change the state to close the dialog
                             setShowDialog(false)
                         },
 
@@ -369,8 +392,13 @@ fun DeleteDialog(showDialog: Boolean, setShowDialog: (Boolean) -> Unit){
                             val firestore = FirebaseFirestore.getInstance()
                             firestore.firestoreSettings = FirebaseFirestoreSettings.Builder().build()
                             val database = FirebaseDatabase.getInstance()
+
                             database.getReference("plants/config/$deleteByName").removeValue()
                             database.getReference("plants/measure/$deleteByName").removeValue()
+
+                            database.getReference("plants/configStatus/isDirty").setValue(true)
+                            database.getReference("plants/configStatus/MessageTag").setValue(deleteByName)
+                            database.getReference("plants/configStatus/toDelete").setValue(true)
 
                             firestore.collection("plants").whereIn("name", listOf(deleteByName))
                                 .get()
@@ -388,17 +416,12 @@ fun DeleteDialog(showDialog: Boolean, setShowDialog: (Boolean) -> Unit){
                                         Log.d("Firestore", "FAILURE")
                                 }
 
-
-
                             Toast.makeText(
                                 context,
                                 "deleted $deleteByName from list",
                                 Toast.LENGTH_LONG
                             ).show()
-                            //items.value!!.remove(item)
-                            //items.value = items.value?.filter { it != item }?.toMutableList()
 
-                            // Change the state to close the dialog
                             setShowDialog(false)
                         },
 
