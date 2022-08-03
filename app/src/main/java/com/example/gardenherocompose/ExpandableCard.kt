@@ -154,11 +154,17 @@ fun ExpandableCard(
                         var progress = plant.currentWaterLevel.toString().toFloat()
 
                         when (plant.species) {
-                            "Trockenpflanze"   -> {progress = ((progress-20))/20}
-                            "Feuchtpflanze"    -> {progress = ((progress-60))/20}
-                            "Sumpfpflanze"     -> {progress = ((progress-80))/20}
+                            "Trockenpflanze"   -> {progress = ((progress-10))/20}
+                            "Feuchtpflanze"    -> {progress = ((progress-40))/20}
+                            "Sumpfpflanze"     -> {progress = ((progress-70))/20}
                         }
                         Log.d("UPDATE", "progress from ${plant.name} is: $progress")
+                        if (progress <= 0.0f){
+                            progress = 0.0f
+                        }
+                        else if (progress >= 1.0f){
+                            progress = 1.0f
+                        }
                         when (plant.species) {
                             "Trockenpflanze"   -> {LinearProgressIndicator(progress = progress, modifier = Modifier.height(7.dp).weight(0.75f))}
                             "Feuchtpflanze"    -> {LinearProgressIndicator(progress = progress, modifier = Modifier.height(7.dp).weight(0.75f))}
@@ -310,9 +316,9 @@ fun EditDialog(showDialog: Boolean, setShowDialog: (Boolean) -> Unit, plant: Pla
                             val database = FirebaseDatabase.getInstance()
 
                             when (plant.species) {
-                                "Trockenpflanze"   -> {plant.minWaterLevel = 20; plant.maxWaterLevel = 40; plant.currentWaterLevel = 20; plant.picture = R.drawable.pic_trockenpflanze}
-                                "Feuchtpflanze"    -> {plant.minWaterLevel = 60; plant.maxWaterLevel = 80; plant.currentWaterLevel = 60; plant.picture = R.drawable.pic_feuchtpflanze}
-                                "Sumpfpflanze"     -> {plant.minWaterLevel = 80; plant.maxWaterLevel = 100; plant.currentWaterLevel = 80; plant.picture = R.drawable.pic_sumpfpflanze}
+                                "Trockenpflanze"   -> {plant.minWaterLevel = 10; plant.maxWaterLevel = 30; plant.currentWaterLevel = 11; plant.picture = R.drawable.pic_trockenpflanze}
+                                "Feuchtpflanze"    -> {plant.minWaterLevel = 40; plant.maxWaterLevel = 60; plant.currentWaterLevel = 41; plant.picture = R.drawable.pic_feuchtpflanze}
+                                "Sumpfpflanze"     -> {plant.minWaterLevel = 70; plant.maxWaterLevel = 90; plant.currentWaterLevel = 71; plant.picture = R.drawable.pic_sumpfpflanze}
                             }
 
                             firestore.collection("plants").whereIn("name", listOf(oldName))
@@ -340,6 +346,10 @@ fun EditDialog(showDialog: Boolean, setShowDialog: (Boolean) -> Unit, plant: Pla
                                             database.getReference("plants/config/${plant.name}/MinMoisture").setValue(plant.minWaterLevel)
                                             database.getReference("plants/config/${plant.name}/MaxMoisture").setValue(plant.maxWaterLevel)
                                             database.getReference("plants/config/${plant.name}/Valve").setValue(plant.valve)
+
+                                            database.getReference("plants/configStatus/isDirty").setValue(true)
+                                            database.getReference("plants/configStatus/MessageTag").setValue(plant.name)
+                                            database.getReference("plants/configStatus/toDelete").setValue(false)
                                         }
                                     } else
                                         Log.d("Firestore", "FAILURE")

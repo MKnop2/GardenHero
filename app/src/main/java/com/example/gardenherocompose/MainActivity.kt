@@ -246,9 +246,9 @@ fun AddDialog(showDialog: Boolean, setShowDialog: (Boolean) -> Unit){
                             val document = firestore.collection("plants").document()
                             plant.id = document.id
                             when (plant.species) {
-                                "Trockenpflanze"   -> {plant.minWaterLevel = 20; plant.maxWaterLevel = 40; plant.currentWaterLevel = 21; plant.picture = R.drawable.pic_trockenpflanze}
-                                "Feuchtpflanze"    -> {plant.minWaterLevel = 60; plant.maxWaterLevel = 80; plant.currentWaterLevel = 61; plant.picture = R.drawable.pic_feuchtpflanze}
-                                "Sumpfpflanze"     -> {plant.minWaterLevel = 80; plant.maxWaterLevel = 100; plant.currentWaterLevel = 81; plant.picture = R.drawable.pic_sumpfpflanze}
+                                "Trockenpflanze"   -> {plant.minWaterLevel = 10; plant.maxWaterLevel = 30; plant.currentWaterLevel = 11; plant.picture = R.drawable.pic_trockenpflanze}
+                                "Feuchtpflanze"    -> {plant.minWaterLevel = 40; plant.maxWaterLevel = 60; plant.currentWaterLevel = 41; plant.picture = R.drawable.pic_feuchtpflanze}
+                                "Sumpfpflanze"     -> {plant.minWaterLevel = 70; plant.maxWaterLevel = 90; plant.currentWaterLevel = 71; plant.picture = R.drawable.pic_sumpfpflanze}
                             }
 
                             val database = FirebaseDatabase.getInstance()
